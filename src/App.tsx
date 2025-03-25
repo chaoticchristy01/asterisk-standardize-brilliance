@@ -7,14 +7,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import Inventory from "@/pages/Inventory";
+import EmployeePerformance from "@/pages/EmployeePerformance";
+import CustomerFeedback from "@/pages/CustomerFeedback";
+import MenuRecommendations from "@/pages/MenuRecommendations";
+import BranchManagement from "@/pages/BranchManagement";
+import Settings from "@/pages/Settings";
 import NotFound from "./pages/NotFound";
-
-// Placeholder components for the routes we haven't implemented yet
-const EmployeePerformance = () => <div className="p-8">Employee Performance Page</div>;
-const CustomerFeedback = () => <div className="p-8">Customer Feedback Page</div>;
-const MenuRecommendations = () => <div className="p-8">Menu Recommendations Page</div>;
-const BranchManagement = () => <div className="p-8">Branch Management Page</div>;
-const Settings = () => <div className="p-8">Settings Page</div>;
 
 const queryClient = new QueryClient();
 
