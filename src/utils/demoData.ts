@@ -107,7 +107,7 @@ export const branches = [
 
 // Dashboard stats
 export const dashboardStats = {
-  totalSales: "₴56,789",
+  totalSales: "$56,789",
   salesTrend: { value: 12.5, isPositive: true },
   customers: "1,234",
   customersTrend: { value: 5.3, isPositive: true },
