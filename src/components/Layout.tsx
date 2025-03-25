@@ -14,7 +14,7 @@ import {
   ChevronLeft,
   Menu,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 interface SidebarLinkProps {
@@ -22,9 +22,10 @@ interface SidebarLinkProps {
   label: string;
   to: string;
   isActive: boolean;
+  sidebarCollapsed: boolean;
 }
 
-const SidebarLink = ({ icon, label, to, isActive }: SidebarLinkProps) => {
+const SidebarLink = ({ icon, label, to, isActive, sidebarCollapsed }: SidebarLinkProps) => {
   return (
     <Link
       to={to}
@@ -43,7 +44,7 @@ const SidebarLink = ({ icon, label, to, isActive }: SidebarLinkProps) => {
       >
         {icon}
       </div>
-      <span className="font-medium">{label}</span>
+      {!sidebarCollapsed && <span className="font-medium truncate">{label}</span>}
     </Link>
   );
 };
@@ -55,9 +56,20 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
+  // Load sidebar state from localStorage on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem("sidebar-collapsed");
+    if (savedState !== null) {
+      setSidebarCollapsed(JSON.parse(savedState));
+    }
+  }, []);
 
   const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    // Save to localStorage
+    localStorage.setItem("sidebar-collapsed", JSON.stringify(newState));
   };
 
   const menuItems = [
@@ -82,11 +94,15 @@ const Layout = ({ children }: LayoutProps) => {
         {/* Logo */}
         <div className="p-4 flex items-center justify-between border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="bg-asterisk-primary text-white h-8 w-8 rounded-md flex items-center justify-center font-bold">
-              A
+            <div className="h-8 w-8 rounded-md flex items-center justify-center">
+              <img 
+                src="/lovable-uploads/7386036b-a7ea-404a-bff9-fd61f6ccdf4b.png" 
+                alt="Asterisk Logo" 
+                className="h-8 w-8 object-contain"
+              />
             </div>
             {!sidebarCollapsed && (
-              <span className="font-semibold text-lg text-asterisk-primary animate-fade-in">
+              <span className="font-semibold text-lg text-asterisk-primary animate-fade-in truncate">
                 Asterisk
               </span>
             )}
@@ -95,7 +111,8 @@ const Layout = ({ children }: LayoutProps) => {
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="h-8 w-8 text-asterisk-text hover:bg-asterisk-primary/10 hover:text-asterisk-primary"
+            className="h-8 w-8 text-asterisk-text hover:bg-asterisk-primary/10 hover:text-asterisk-primary transition-all duration-300"
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {sidebarCollapsed ? <Menu size={18} /> : <ChevronLeft size={18} />}
           </Button>
@@ -110,6 +127,7 @@ const Layout = ({ children }: LayoutProps) => {
               label={item.label}
               to={item.path}
               isActive={location.pathname === item.path}
+              sidebarCollapsed={sidebarCollapsed}
             />
           ))}
         </nav>
@@ -120,9 +138,9 @@ const Layout = ({ children }: LayoutProps) => {
             A
           </div>
           {!sidebarCollapsed && (
-            <div className="animate-fade-in">
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-muted-foreground">admin@asterisk.com</p>
+            <div className="animate-fade-in truncate">
+              <p className="text-sm font-medium truncate">Admin User</p>
+              <p className="text-xs text-muted-foreground truncate">admin@asterisk.com</p>
             </div>
           )}
         </div>
