@@ -2,7 +2,7 @@
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { stockItems } from "@/utils/demoData";
+import { stockItems as initialStockItems } from "@/utils/demoData";
 import { Package, PackagePlus, AlertTriangle, Check } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -16,10 +16,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
+import AddItemModal from "@/components/inventory/AddItemModal";
 
 const Inventory = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterBranch, setFilterBranch] = useState("All Branches");
+  const [stockItems, setStockItems] = useState(initialStockItems);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   
   // Calculate branch options
   const branchOptions = ["All Branches", ...new Set(stockItems.map(item => item.branch))];
@@ -33,6 +37,35 @@ const Inventory = () => {
   
   // Count low stock items
   const lowStockCount = stockItems.filter(item => item.status === "low").length;
+  
+  // Calculate overall stock level
+  const calculateStockLevel = () => {
+    const totalItems = stockItems.length;
+    if (totalItems === 0) return 0;
+    
+    const normalItems = stockItems.filter(item => item.status === "normal").length;
+    return Math.round((normalItems / totalItems) * 100);
+  };
+  
+  const stockLevel = calculateStockLevel();
+  
+  // Handle adding a new item
+  const handleAddItem = (newItem: any) => {
+    const newItemWithId = {
+      id: stockItems.length + 1,
+      name: newItem.name,
+      quantity: newItem.quantity,
+      threshold: newItem.threshold,
+      branch: newItem.branch,
+      status: newItem.quantity < newItem.threshold ? "low" : "normal"
+    };
+    
+    setStockItems([...stockItems, newItemWithId]);
+    toast({
+      title: "Success",
+      description: `${newItem.name} has been added to inventory.`,
+    });
+  };
   
   return (
     <div className="space-y-8">
@@ -71,9 +104,9 @@ const Inventory = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Overall Stock Level</p>
-              <h3 className="text-2xl font-bold mt-2 text-asterisk-text">83%</h3>
+              <h3 className="text-2xl font-bold mt-2 text-asterisk-text">{stockLevel}%</h3>
               <div className="mt-2 w-full">
-                <Progress value={83} className="h-2" />
+                <Progress value={stockLevel} className="h-2" />
               </div>
             </div>
             <div className="rounded-full p-2 bg-green-100 text-green-500">
@@ -103,7 +136,10 @@ const Inventory = () => {
               <option key={branch} value={branch}>{branch}</option>
             ))}
           </select>
-          <Button className="bg-asterisk-primary hover:bg-asterisk-secondary">
+          <Button 
+            className="bg-asterisk-primary hover:bg-asterisk-secondary"
+            onClick={() => setIsAddModalOpen(true)}
+          >
             <PackagePlus size={16} className="mr-2" />
             Add New Item
           </Button>
@@ -162,6 +198,13 @@ const Inventory = () => {
           </TableBody>
         </Table>
       </Card>
+      
+      {/* Add Item Modal */}
+      <AddItemModal 
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        onAddItem={handleAddItem}
+      />
     </div>
   );
 };
